@@ -1,0 +1,517 @@
+{
+  "name": "Automação Recebimento Currículo",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $json.id }}",
+        "message": "Olá recebemos o seu currículos e vamos respoonder brevemente Att ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -288,
+        -352
+      ],
+      "id": "c6b4c518-c7bb-4a5a-931c-cd348ed631c3",
+      "name": "Reply to a message",
+      "webhookId": "6dce3b3c-3c21-4c78-af19-887815ae6ec3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WziLdDljhu4C8zWg",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "markAsRead",
+        "messageId": "={{ $('Gatilho currículo recebido').item.json.id }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -80,
+        -352
+      ],
+      "id": "4bdeea82-f0da-4338-ace6-46c4f7684843",
+      "name": "Confirmação de Leitura",
+      "webhookId": "9a284319-bc2c-4e3d-ae6c-a332e34539d9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "aBxkbIR7JeEHjGZ4",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "q": "has:attachment",
+          "readStatus": "unread"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -496,
+        -352
+      ],
+      "id": "5315b87f-56e3-4d65-be45-abb9d75fe30a",
+      "name": "Gatilho currículo recebido",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "aBxkbIR7JeEHjGZ4",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $('Gatilho currículo recebido').item.json.id }}",
+        "simple": false,
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        128,
+        -352
+      ],
+      "id": "90d20a68-6300-430e-b566-2e81b6bc5ada",
+      "name": "Baixar Anexo",
+      "webhookId": "ec3090ca-4244-4908-83ca-df7116ca5800",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WziLdDljhu4C8zWg",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "={{$('Baixar Anexo').item.binary.attachment_0 }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "14YMbtX0QJJyV_x7YkuU996xea-zjH4Ppk9D8UYYmBT0Rxyh0TkSHNb2bsX2w3ecLW5tDv9oG",
+          "mode": "list",
+          "cachedResultName": "Currículo",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/14YMbtX0QJJyV_x7YkuU996xea-zjH4Ppk9D8UYYmBT0Rxyh0TkSHNb2bsX2w3ecLW5tDv9oG"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        336,
+        -352
+      ],
+      "id": "2cbcc6d7-5c0c-48f1-9858-d74679faf71a",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "yBe1Jm5MKLVBOnm5",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.1-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.1-flash-lite"
+        },
+        "text": "Estou enviando um currículo. quero você leia e transcreva o conteúdo do arquivo em anexo",
+        "inputType": "binary",
+        "binaryPropertyName": "attachment_0",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        336,
+        -160
+      ],
+      "id": "e19a1c85-6303-41e1-9ffc-d6158b2d1619",
+      "name": "Analyze document",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FJbGUKrZp1C7ErjW",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.content.parts[0].text }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Nome",
+              "description": "Nome"
+            },
+            {
+              "name": "Profissão:",
+              "description": "Profissão:"
+            },
+            {
+              "name": "Resumo: ",
+              "description": "Resumo: "
+            },
+            {
+              "name": "Experiência",
+              "description": "Experiência"
+            },
+            {
+              "name": "Competências:",
+              "description": "Competências:"
+            },
+            {
+              "name": "E-mail:",
+              "description": "E-mail:"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        544,
+        -160
+      ],
+      "id": "5aa56b12-ed1d-4874-91fe-ee147cd7704f",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        48
+      ],
+      "id": "de635f7a-9fc2-46fe-bfa3-262227a0ad17",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FJbGUKrZp1C7ErjW",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1iVza5JdSKWTl6BnmzI03pnTbFXLLvMdgCReaGgyPUJg",
+          "mode": "list",
+          "cachedResultName": "Currículos para vagas N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iVza5JdSKWTl6BnmzI03pnTbFXLLvMdgCReaGgyPUJg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1iVza5JdSKWTl6BnmzI03pnTbFXLLvMdgCReaGgyPUJg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Nome ": "=  {{ $('Information Extractor').item.json.output.Nome }}",
+            "Profissão:": "={{ $('Information Extractor').item.json.output['Profissão:'] }}",
+            "Resumo:": "={{ $('Information Extractor').item.json.output['Resumo: '] }}",
+            "Experiência": "={{ $('Information Extractor').item.json.output['Experiência'] }}",
+            "Competências:": "={{ $('Information Extractor').item.json.output['Competências:'] }}",
+            "E-mail:": "={{ $('Information Extractor').item.json.output['E-mail:'] }}",
+            "Avaliação": "={{ $json.output }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Nome ",
+              "displayName": "Nome ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Profissão:",
+              "displayName": "Profissão:",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Resumo:",
+              "displayName": "Resumo:",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Experiência",
+              "displayName": "Experiência",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Competências:",
+              "displayName": "Competências:",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "E-mail:",
+              "displayName": "E-mail:",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Avaliação",
+              "displayName": "Avaliação",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1264,
+        -160
+      ],
+      "id": "e15002d6-7f15-4696-84b6-9900ca0d1f50",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "RoYs5V5bbV8qFW5b",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Analyze document').item.json.content.parts[0].text }}",
+        "options": {
+          "systemMessage": "You are System Message:\n\nQuero que se comporte como um experiente profissional de RH focado em recrutamento e seleção. Você está realizando a triagem de currículos para uma vaga de Analista de Marketing Senior. Analise a transcrição do currículo abaixo e avalie se o candidato está apto a seguir no processo seletivo. Você deverá responder com uma das 3 classificações: Apto, Não Apto ou Pendente de Avaliação Humana. Essa classificação deve ser seguida de uma justificativa mais detalhada possível do porque o candidato recebeu essa classificação.\nVocê deverá levar em consideração apenas a aderência do candidato aos requisitos, responsabilidades e conhecimentos desejáveis à vaga. A vaga será descrita abaixo:\n\nAnalista de Marketing Sênior\nSobre a vaga\nEstamos em busca de um(a) Analista de Marketing Sênior para integrar nosso time de Marketing, contribuindo para a construção e evolução da estratégia de marca, aquisição e engajamento de clientes em um dos maiores bancos digitais do Brasil. A posição exige visão estratégica, domínio analítico e capacidade de execução em um ambiente dinâmico e orientado a dados.\nResponsabilidades\nPlanejar, executar e otimizar campanhas de marketing multicanal (digital, mídia paga, CRM e parcerias), com foco em performance e geração de resultado para o negócio. Atuar na definição de KPIs, análise de métricas e construção de relatórios que sustentem decisões estratégicas. Colaborar com times de Produto, Dados, Design e Growth no desenvolvimento de jornadas de cliente e iniciativas de aquisição e retenção. Conduzir testes A/B e experimentos para validação de hipóteses de marketing. Gerenciar budget de campanhas e relacionamento com agências e fornecedores. Apresentar resultados e recomendações para lideranças e stakeholders internos.\nRequisitos\nFormação superior completa em Marketing, Administração, Publicidade, Economia ou áreas correlatas. Experiência mínima de 5 anos em marketing, com vivência em ambientes digitais, fintechs ou instituições financeiras. Domínio de ferramentas de análise de dados (Excel avançado, Google Analytics, Power BI ou similares) e plataformas de mídia (Google Ads, Meta Ads). Conhecimento em metodologias de growth marketing e funis de aquisição. Forte capacidade analítica, comunicação e trabalho em equipe.\nDesejável\nExperiência prévia em bancos digitais, fintechs ou empresas de tecnologia financeira. Inglês intermediário ou avançado. Vivência com ferramentas de automação de marketing e CRM (Salesforce, HubSpot, RD Station ou similares).\nBenefícios\nVale-refeição/alimentação, plano de saúde e odontológico, seguro de vida, participação nos lucros e resultados (PLR), modelo de trabalho híbrido ou remoto, auxílio home office, gympass, parceria com instituições de ensino e programas de desenvolvimento de carreira.\n\na helpful assistant"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        896,
+        -160
+      ],
+      "id": "9d6f8dc8-2f94-4ec8-8d39-a157686ed37e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        976,
+        48
+      ],
+      "id": "0f3b3bff-c899-4426-bbf9-50114da0d784",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "FJbGUKrZp1C7ErjW",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Reply to a message": {
+      "main": [
+        [
+          {
+            "node": "Confirmação de Leitura",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gatilho currículo recebido": {
+      "main": [
+        [
+          {
+            "node": "Reply to a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmação de Leitura": {
+      "main": [
+        [
+          {
+            "node": "Baixar Anexo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baixar Anexo": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Analyze document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        []
+      ]
+    },
+    "Analyze document": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "739dfe63-4fd3-495e-950e-8894440f5b56",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9e9ef3fb04d7feac7930e0a3ec75e8cc25e6f655897532915f1f6b5fb33928f2"
+  },
+  "nodeGroups": [],
+  "id": "v6QKU2L3GjMkZtLw",
+  "tags": []
+}

@@ -1,0 +1,28 @@
+# Credenciais e arquivos sensíveis
+
+.env
+.env.*
+*.key
+*.pem
+credentials.json
+
+# Arquivos temporários
+
+*.tmp
+*.log
+
+# Sistema operacional
+
+Thumbs.db
+.DS_Store
+
+# Python
+
+**pycache**/
+*.pyc
+.venv/
+venv/
+
+# VS Code
+
+.vscode/
