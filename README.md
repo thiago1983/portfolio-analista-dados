@@ -2,7 +2,7 @@
 
 Olá! Seja bem-vindo ao meu portfólio de projetos na área de Dados e Business Intelligence.
 
-Este repositório reúne projetos desenvolvidos com diferentes ferramentas utilizadas no mercado de dados, com foco em análise, tratamento, visualização, automação e geração de insights.
+Este repositório reúne projetos desenvolvidos com diferentes ferramentas utilizadas no mercado de trabalho, com foco em análise, tratamento, visualização, automação e geração de insights.
 
 ## 🛠️ Tecnologias e ferramentas
 
